@@ -215,9 +215,7 @@ class GF_Field_Repeater2 extends GF_Field {
 			$admin_buttons = $this->get_admin_buttons();
 			$field_content = "{$admin_buttons}
 				<div class=\"gf-pagebreak-first gf-pagebreak-container gf-repeater2 gf-repeater2-start\">
-					<div class=\"gf-pagebreak-text-before\">Begin Repeater</div>
-					<div class=\"gf-pagebreak-text-main\"><span>REPEATER</span></div>
-					<div class=\"gf-pagebreak-text-after\">Top of Repeater</div>
+					<div class=\"gf-pagebreak-text-main\" style='text-align:center;'><span>-- START REPEATER --</span></div>
 				</div>";
 		} else {
 			$field_label		= $this->get_field_label($force_frontend_label, $value);
@@ -240,9 +238,8 @@ class GF_Field_Repeater2 extends GF_Field {
 			$is_form_editor		= $this->is_form_editor();
 			$id					= (int) $this->id;
 			$field_id			= $is_entry_detail || $is_form_editor || $form_id == 0 ? "input_$id" : 'input_' . $form_id . "_$id";
-			$tabindex  			= $this->get_tabindex();
-			$repeater2_parem		= $this->inputName;
-			$repeater2_start		= $this->start;
+			$repeater2_parem	= $this->inputName;
+			$repeater2_start	= $this->start;
 			$repeater2_min		= $this->min;
 			$repeater2_max		= $this->max;
 			$repeater2_required	= $this->repeater2RequiredChildren;
@@ -300,7 +297,7 @@ class GF_Field_Repeater2 extends GF_Field {
 				$value = json_encode($value);
 			}
 
-			return sprintf("<input name='input_%d' id='%s' type='hidden' class='gform_repeater2' value='%s' %s />", $id, $field_id, $value, $tabindex);
+			return sprintf("<input name='input_%d' id='%s' type='hidden' class='gform_repeater2' value='%s' />", $id, $field_id, $value);
 		}
 	}
 
@@ -376,7 +373,7 @@ class GF_Field_Repeater2 extends GF_Field {
 			}
 			$value[$i] = $childValue;
 		}
-		
+
 		// Ensure proper serialization for WordPress 6.8 compatibility
 		return wp_json_encode($value);
 	}
@@ -496,8 +493,10 @@ class GF_Field_Repeater2 extends GF_Field {
 										$childValueOutput .= $childValueData."\n";
 									}
 								}
-								
-								if ($format == 'html') { $childValueOutput .= "</ul>\n"; }
+
+								if ($format == 'html') {
+									$childValueOutput .= "</ul>\n";
+								}
 							}
 						}
 
