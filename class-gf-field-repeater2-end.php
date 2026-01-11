@@ -21,7 +21,6 @@ class GF_Field_Repeater2_End extends GF_Field {
     public function get_form_editor_field_settings() {
         return array(
             'css_class_setting',
-            'conditional_logic_field_setting',
         );
     }
 
@@ -79,30 +78,27 @@ class GF_Field_Repeater2_End extends GF_Field {
         return $tooltips;
     }
 
-    public function get_field_content( $value, $force_frontend_label, $form ) {
-        if (is_admin()) {
-			$admin_buttons	= $this->get_admin_buttons();
+	public function get_field_content( $value, $force_frontend_label, $form ) {
+		if (is_admin()) {
+			$admin_buttons = $this->get_admin_buttons();
 
 			$field_content = "{$admin_buttons}
 				<div class=\"gf-pagebreak-end gf-pagebreak-container gf-repeater2-end\">
-					<div class=\"gf-pagebreak-text-before\">End Repeater</div>
-					<div class=\"gf-pagebreak-text-main\"><span>REPEATER</span></div>
-					<div class=\"gf-pagebreak-text-after\">End of Repeater</div>
+					<div class=\"gf-pagebreak-text-main\" style='text-align:center;'><span>-- END REPEATER --</span></div>
 				</div>";
 		} else {
 			$add_html    = $this->add;
 			$remove_html = $this->remove;
 			$hideButtons = $this->hideButtons;
-			$tabindex    = GFCommon::get_tabindex();
 
 			if (empty($add_html)) { $add_html = "<img class=\"gf_repeater2_add_default\" alt=\"+\" src=\"data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7\">"; }
 			if (empty($remove_html)) { $remove_html = "<img class=\"gf_repeater2_remove_default\" alt=\"-\" src=\"data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7\">"; }
 
 			$field_content = "<div class=\"ginput_container ginput_container_repeater2-end\">\n";
 
-			if (!$hideButtons) {
-				$field_content .= "<span class=\"gf_repeater2_add\" {$tabindex}>{$add_html}</span>";
-				$field_content .= "<span class=\"gf_repeater2_remove\" {$tabindex}>{$remove_html}</span>";
+			if ( ! $hideButtons ) {
+				$field_content .= "<button type='button' class=\"gf_repeater2_add\">{$add_html}</button>";
+				$field_content .= "<button type='button' class=\"gf_repeater2_remove\">{$remove_html}</button>";
 			}
 
 			$field_content .= "</div>";
