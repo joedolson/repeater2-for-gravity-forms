@@ -160,8 +160,9 @@ class GF_Field_Repeater2 extends GF_Field {
 					$inputNames = $field['inputs'];
 					$repeatSkips = rgars($field, 'conditionalLogic/skip');
 
-
-					if (!is_array($inputNames)) { continue; }
+					if ( !is_array($inputNames) ) {
+						continue;
+					}
 
 					if (is_array($repeatSkips)) {
 						if (in_array($i, $repeatSkips) || in_array('all', $repeatSkips)) { continue; }
@@ -306,7 +307,7 @@ class GF_Field_Repeater2 extends GF_Field {
 		$value = Array();
 
 		for ($i = 1; $i < $dataArray['repeatCount'] + 1; $i++) {
-			foreach ($dataArray['children'] as $field_id=>$field) {
+			foreach ( $dataArray['children'] as $field_id => $field ) {
 				$inputData = Array();
 
 				if (array_key_exists('inputs', $field)) {
@@ -353,6 +354,8 @@ class GF_Field_Repeater2 extends GF_Field {
 											$hours = str_pad($getInputData[0], 2, '0', STR_PAD_LEFT);
 											$minutes = str_pad($getInputData[1], 2, '0', STR_PAD_LEFT);
 											$inputData[] = $hours . ':' . $minutes;
+										} elseif ( $fieldType == 'date' && count($getInputData) == 3 ) {
+											$inputData[] = $getInputData[0] . '/' . $getInputData[1] . '/' . $getInputData[2];
 										} else {
 											foreach ($getInputData as $theInputData) {
 												$inputData[] = $theInputData;
@@ -366,7 +369,8 @@ class GF_Field_Repeater2 extends GF_Field {
 						}
 					}
 				} else {
-					if (GF_Field_Repeater2::get_field_type($form, $field_id) == 'section') { $inputData = '[gfRepeater-section]'; }
+					if ( GF_Field_Repeater2::get_field_type($form, $field_id) == 'section' ) { 	$inputData = '[gfRepeater-section]'; 
+					}
 				}
 
 				$childValue[$field_id] = $inputData;
@@ -375,7 +379,7 @@ class GF_Field_Repeater2 extends GF_Field {
 		}
 
 		// Ensure proper serialization for WordPress 6.8 compatibility
-		return wp_json_encode($value);
+		return wp_json_encode( $value );
 	}
 
 	public function get_value_entry_list($value, $entry, $field_id, $columns, $form) {
@@ -471,12 +475,18 @@ class GF_Field_Repeater2 extends GF_Field {
 							if ($field_index !== false && $form['fields'][$field_index]['type'] == 'time') {
 								$is_time_field = true;
 							}
+							$is_date_field = false;
+							if ($field_index !== false && $form['fields'][$field_index]['type'] == 'date') {
+								$is_date_field = true;
+							}
 							
 							if ($is_time_field && count($childValue) == 2) {
 								// Format time as HH:MM
 								$hours = str_pad($childValue[0], 2, '0', STR_PAD_LEFT);
 								$minutes = str_pad($childValue[1], 2, '0', STR_PAD_LEFT);
 								$childValueOutput = $hours . ':' . $minutes;
+							} elseif ( $is_date_field ) {
+								$childValueOutput = implode( '/', $childValue );
 							} else {
 								if ($format == 'html') {
 									if ($media == 'email') {
@@ -500,7 +510,7 @@ class GF_Field_Repeater2 extends GF_Field {
 							}
 						}
 
-						if ($media == 'email') { $tableStyling = ''; } else { $tableStyling = ' class=\"entry-view-field-value\"'; }
+						if ($media == 'email') { $tableStyling = ''; } else { $tableStyling = ' class="entry-view-field-value"'; }
 
 						if ($format == 'html') {
 							$tableContents .= "<tr>\n<td colspan=\"2\"".$tableStyling.">".$childValueOutput."</td>\n</tr>\n";
