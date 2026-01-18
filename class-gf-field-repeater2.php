@@ -32,7 +32,7 @@ class GF_Field_Repeater2 extends GF_Field {
             if ( GF_Field_Repeater2::get_field_index( $form ) !== false ) {
                 wp_enqueue_script( 'gforms_repeater2_postcapture_js', plugins_url( 'js/jquery.postcapture.min.js', __FILE__ ), array( 'jquery' ), '0.0.1' );
                 wp_enqueue_script( 'jquery_mask', 'https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.js', array( 'jquery' ), '1.14.16' );
-                wp_enqueue_script( 'gforms_repeater2_js', plugins_url( 'js/gf-repeater2.js', __FILE__ ), array( 'jquery', 'jquery_mask' ), GF_REPEATER_VERSION );
+                wp_enqueue_script( 'gforms_repeater2_js', plugins_url( 'js/gf-repeater2.js', __FILE__ ), array( 'jquery', 'jquery_mask' ), GF_REPEATER_VERSION . wp_rand( 10, 1000 ) );
 
                 wp_enqueue_style( 'gforms_repeater2_css', plugins_url( 'css/gf-repeater2.css', __FILE__ ), array(), GF_REPEATER_VERSION );
             }

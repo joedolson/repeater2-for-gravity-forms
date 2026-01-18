@@ -119,7 +119,9 @@ function gfRepeater_getRepeaters() {
 
 					var repeater2data = {};
 					var prevRepeatCount = null;
-					if (gfRepeater_submitted && capturedData) { prevRepeatCount = capturedData['repeatCount']; }
+					if (gfRepeater_submitted && capturedData) { 
+						prevRepeatCount = capturedData['repeatCount']; 
+					}
 
 					repeater2data = {
 						repeatCount: 1,
@@ -133,7 +135,8 @@ function gfRepeater_getRepeaters() {
 						data: repeater2data,
 						settings: repeater2Settings,
 						controllers: repeater2Controllers,
-						children: repeater2Children
+						children: repeater2Children,
+						values: repeater2Info.values,
 					};
 
 					// Set back to defaults for the next repeater2
@@ -340,11 +343,14 @@ function gfRepeater_setRepeaterChildAttrs(formId, repeater2Id, repeater2ChildEle
 			}
 
 			if (inputName) {
-				
+				var inputVal = '';
+				var newInputName = '';
 				if (inputName.slice(-2) == '[]') {
-					var newInputName = inputName.slice(0, inputName.length - 2) + '-' + repeater2Id + '-' + repeatId + '[]';
+					newInputName = inputName.slice(0, inputName.length - 2) + '-' + repeater2Id + '-' + repeatId + '[]';
+					inputVal = repeater2.values[ inputName.slice(0, inputName.length - 2) + '-' + repeater2Id + '-' + repeatId ] ?? [];
 				} else {
-					var newInputName = inputName + '-' + repeater2Id + '-' + repeatId;
+					newInputName = inputName + '-' + repeater2Id + '-' + repeatId;
+					inputVal = repeater2.values[ newInputName ] ?? '';
 				}
 				jQuery(inputElement).attr('name', newInputName)
 			}
@@ -395,11 +401,24 @@ function gfRepeater_setRepeaterChildAttrs(formId, repeater2Id, repeater2ChildEle
 				}, 100);
 			}
 
-			if (gfRepeater_submitted && checkValidation) {
+			let setVal = false;
+			if ( newInputName && inputVal ) {
+				setVal = true;
+			}
+
+			if (setVal || gfRepeater_submitted && checkValidation) {
 				if (newInputName) {
-					var savedValue = jQuery.captures(newInputName);
-					if (savedValue) {
-						gfRepeater_setInputValue(inputElement, savedValue);
+					inputVal = ( ! inputVal ) ? jQuery.captures(newInputName) : inputVal;
+					if (inputVal) {
+						if ( typeof inputVal === 'object' ) {
+							let length = inputVal.length;
+							inputElement.each( function(i) {
+								let el = jQuery( inputElement[i] );
+								gfRepeater_setInputValue( el, inputVal[i]);
+							});
+						} else {
+							gfRepeater_setInputValue(inputElement, inputVal);
+						}
 					}
 				}
 
@@ -976,8 +995,12 @@ function gfRepeater_getInputValue(inputElement) {
         inputValue		The value to set to the input.
 */
 function gfRepeater_setInputValue(inputElement, inputValue) {
-	if (inputElement.is(':checkbox, :radio')) {
-		if (inputValue == 'on' || inputElement.prop('value') === inputValue) { inputElement.prop('checked', true) } else { inputElement.prop('checked', false) }
+	if (inputElement.is( ':checkbox, :radio') ) {
+		if ( inputValue == 'on' || inputElement.prop('value') === inputValue ) { 
+			inputElement.prop('checked', true) 
+		} else {
+			inputElement.prop('checked', false) 
+		}
 	} else {
 		inputElement.val(inputValue);
 	}
