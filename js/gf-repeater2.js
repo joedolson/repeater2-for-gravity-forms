@@ -891,7 +891,7 @@ function gfRepeater_select(formId, repeater2Id, repeatId, childId, inputId) {
         inputId (Optional)		A element ID to search for.
 */
 function gfRepeater_findElementByNameOrId(searchElement, elementName, elementId) {
-	if (elementName.slice(-2) == '[]') { 
+	if (elementName && elementName.slice(-2) == '[]') { 
 		elementName = elementName.slice(0, elementName.length - 2); 
 	}
 	if (elementName) {
