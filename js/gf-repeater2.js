@@ -147,7 +147,6 @@ function gfRepeater_getRepeaters() {
 					repeater2RequiredChildren = null;
 				} else {
 					// Repeater Child
-
 					repeater2ChildCount += 1;
 					var childElement = jQuery(this);
 					var childLabel = jQuery(this).children('.gfield_label').text();
@@ -341,14 +340,13 @@ function gfRepeater_setRepeaterChildAttrs(formId, repeater2Id, repeater2ChildEle
 			}
 
 			if (inputName) {
+				
 				if (inputName.slice(-2) == '[]') {
 					var newInputName = inputName.slice(0, inputName.length - 2) + '-' + repeater2Id + '-' + repeatId + '[]';
 				} else {
 					var newInputName = inputName + '-' + repeater2Id + '-' + repeatId;
 				}
-
-				jQuery(inputElement)
-					.attr('name', newInputName)
+				jQuery(inputElement).attr('name', newInputName)
 			}
 
 			// Maybe include https://www.geeksforgeeks.org/jquery-mask-plugin/
@@ -893,9 +891,20 @@ function gfRepeater_select(formId, repeater2Id, repeatId, childId, inputId) {
         inputId (Optional)		A element ID to search for.
 */
 function gfRepeater_findElementByNameOrId(searchElement, elementName, elementId) {
-	if (elementName) { var foundElement = jQuery(searchElement).find("[name^='" + elementName + "']"); }
-	if (!foundElement && elementId) { var foundElement = jQuery(searchElement).find("[id^='" + elementId + "']"); }
-	if (foundElement) { return foundElement; } else { return false; }
+	if (elementName.slice(-2) == '[]') { 
+		elementName = elementName.slice(0, elementName.length - 2); 
+	}
+	if (elementName) {
+		var foundElement = jQuery(searchElement).find("[name^='" + elementName + "']");
+	}
+	if (!foundElement && elementId) { 
+		var foundElement = jQuery(searchElement).find("[id^='" + elementId + "']"); 
+	}
+	if (foundElement) { 
+		return foundElement; 
+	} else { 
+		return false; 
+	}
 }
 
 /*
