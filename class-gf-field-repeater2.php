@@ -32,7 +32,7 @@ class GF_Field_Repeater2 extends GF_Field {
             if ( GF_Field_Repeater2::get_field_index( $form ) !== false ) {
                 wp_enqueue_script( 'gforms_repeater2_postcapture_js', plugins_url( 'js/jquery.postcapture.min.js', __FILE__ ), array( 'jquery' ), '0.0.1' );
                 wp_enqueue_script( 'jquery_mask', 'https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.js', array( 'jquery' ), '1.14.16' );
-                wp_enqueue_script( 'gforms_repeater2_js', plugins_url( 'js/gf-repeater2.js', __FILE__ ), array( 'jquery', 'jquery_mask' ), GF_REPEATER_VERSION . wp_rand( 10, 1000 ) );
+                wp_enqueue_script( 'gforms_repeater2_js', plugins_url( 'js/gf-repeater2.js', __FILE__ ), array( 'jquery', 'jquery_mask' ), GF_REPEATER_VERSION );
 
                 wp_enqueue_style( 'gforms_repeater2_css', plugins_url( 'css/gf-repeater2.css', __FILE__ ), array(), GF_REPEATER_VERSION );
             }
@@ -245,12 +245,12 @@ class GF_Field_Repeater2 extends GF_Field {
 			$repeater2_max		= $this->max;
 			$repeater2_required	= $this->repeater2RequiredChildren;
 			$repeater2_children	= $this->repeater2Children;
+			$repeater2_child_values = array();
 
 			if (!empty($repeater2_parem)) {
 				$repeater2_parem_value = GFFormsModel::get_parameter_value($repeater2_parem, $value, $this);
 				if (!empty($repeater2_parem_value)) { $repeater2_start = $repeater2_parem_value; }
 			}
-
 			if (!empty($repeater2_children)) {
 				$repeater2_children_info = array();
 				$repeater2_parems = GF_Field_Repeater2::get_children_parem_values($form, $repeater2_children);
@@ -258,6 +258,11 @@ class GF_Field_Repeater2 extends GF_Field {
 				foreach($repeater2_children as $repeater2_child) {
 					$repeater2_children_info[$repeater2_child] = array();
 					$repeater2_child_field_index = GF_Field_Repeater2::get_field_index($form, 'id', $repeater2_child);
+
+					for( $i=1; $i < $repeater2_max; $i++ ) {
+						$post_value = rgpost( 'input_' . $repeater2_child . '-' . $id . '-' . $i );
+						$repeater2_child_values["input_$repeater2_child-$id-$i"] = $post_value;
+					}
 
 					if (!empty($repeater2_required)) {
 						if (in_array($repeater2_child, $repeater2_required)) {
@@ -287,22 +292,23 @@ class GF_Field_Repeater2 extends GF_Field {
 				$repeater2_children = $repeater2_children_info;
 			}
 
-			if (empty($value)) {
-                $value = array();
-				$value['formId'] = $form_id;
-				if (!empty($repeater2_start)) { $value['start'] = $repeater2_start; }
-				if (!empty($repeater2_min)) { $value['min'] = $repeater2_min; }
-				if (!empty($repeater2_max)) { $value['max'] = $repeater2_max; }
-				if (!empty($repeater2_children)) { $value['children'] = $repeater2_children; }
+			// Tracks form submissions, so rebuild every time.
+			$value = array();
+			$value['formId'] = $form_id;
+			if (!empty($repeater2_start)) { $value['start'] = $repeater2_start; }
+			if (!empty($repeater2_min)) { $value['min'] = $repeater2_min; }
+			if (!empty($repeater2_max)) { $value['max'] = $repeater2_max; }
+			if (!empty($repeater2_children)) { $value['children'] = $repeater2_children; }
+			if (!empty($repeater2_child_values)) { $value['values'] = $repeater2_child_values; }
 
-				$value = json_encode($value);
-			}
+			$value = json_encode($value);
+
 
 			return sprintf("<input name='input_%d' id='%s' type='hidden' class='gform_repeater2' value='%s' />", $id, $field_id, $value);
 		}
 	}
 
-	public function get_value_save_entry($value, $form, $input_name, $lead_id, $lead) {
+	public function get_value_save_entry( $value, $form, $input_name, $lead_id, $lead ) {
 		$dataArray = json_decode($value, true);
 		$value = Array();
 
@@ -315,8 +321,9 @@ class GF_Field_Repeater2 extends GF_Field {
 					$repeatSkips = rgars($field, 'conditionalLogic/skip');
 
 
-					if (is_array($repeatSkips)) {
-						if (in_array($i, $repeatSkips) || in_array('all', $repeatSkips)) { continue; }
+					if ( is_array($repeatSkips) ) {
+						if ( in_array($i, $repeatSkips) || in_array('all', $repeatSkips) ) { 	continue;
+						}
 					}
 					
 					if (is_array($inputNames)) {
@@ -347,17 +354,21 @@ class GF_Field_Repeater2 extends GF_Field {
 							} else {
 								// Handle regular field data
 								if (!empty($getInputData)) {
-									if (is_array($getInputData)) {
+									if ( is_array($getInputData) ) {
 										// Special handling for time fields
 										if ($fieldType == 'time' && count($getInputData) == 2) {
 											// Format time as HH:MM
 											$hours = str_pad($getInputData[0], 2, '0', STR_PAD_LEFT);
 											$minutes = str_pad($getInputData[1], 2, '0', STR_PAD_LEFT);
 											$inputData[] = $hours . ':' . $minutes;
-										} elseif ( $fieldType == 'date' && count($getInputData) == 3 ) {
+										} elseif ( $fieldType == 'date' ) {
 											$inputData[] = $getInputData[0] . '/' . $getInputData[1] . '/' . $getInputData[2];
+											for ( $d = 0; $d < 3; $d++ ) {
+												unset( $getInputData[ $d ] );
+											}
+											continue;
 										} else {
-											foreach ($getInputData as $theInputData) {
+											foreach ( $getInputData as $theInputData ) {
 												$inputData[] = $theInputData;
 											}
 										}
@@ -373,9 +384,9 @@ class GF_Field_Repeater2 extends GF_Field {
 					}
 				}
 
-				$childValue[$field_id] = $inputData;
+				$childValue[ $field_id ] = $inputData;
 			}
-			$value[$i] = $childValue;
+			$value[ $i ] = $childValue;
 		}
 
 		// Ensure proper serialization for WordPress 6.8 compatibility
