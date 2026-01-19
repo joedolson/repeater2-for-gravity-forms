@@ -255,13 +255,13 @@ class GF_Field_Repeater2 extends GF_Field {
 				$repeater2_children_info = array();
 				$repeater2_parems = GF_Field_Repeater2::get_children_parem_values($form, $repeater2_children);
 
-				foreach($repeater2_children as $repeater2_child) {
+				foreach( $repeater2_children as $repeater2_child ) {
 					$repeater2_children_info[$repeater2_child] = array();
 					$repeater2_child_field_index = GF_Field_Repeater2::get_field_index($form, 'id', $repeater2_child);
 
 					for( $i=1; $i < $repeater2_max; $i++ ) {
-						$post_value = rgpost( 'input_' . $repeater2_child . '-' . $id . '-' . $i );
-						$repeater2_child_values["input_$repeater2_child-$id-$i"] = $post_value;
+						$post_value = rgpost( 'input_' . $repeater2_child . '-' . $i . '-1' );
+						$repeater2_child_values["input_$repeater2_child-$i-1"] = $post_value;
 					}
 
 					if (!empty($repeater2_required)) {
