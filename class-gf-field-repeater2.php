@@ -230,11 +230,28 @@ class GF_Field_Repeater2 extends GF_Field {
 		return $field_content;
 	}
 
-	public function get_field_input($form, $value = '', $entry = null) {
+	public function get_field_input( $form, $value = '', $entry = null ) {
 		if (is_admin()) {
 			return '';
 		} else {
 			$form_id			= $form['id'];
+			$save_field_count   = get_option( 'gf_repeater_fields_' . $form_id, array() );
+			if ( empty( $save_field_count ) ) {
+				$form_data          = GFAPI::get_form( $form_id );
+				$fields             = $form_data['fields'];
+				$save_field_count   = array();
+				$i = 0;
+
+				foreach ( $fields as $object ) {
+					if ( $object instanceof GF_Field_Repeater2 ) {
+						$id    = $object->id;
+						$count = $i;
+						++$i;
+						$save_field_count[ $id ] = $i;
+					}
+				}
+				update_option( 'gf_repeater_fields_' . $form_id, $save_field_count );
+			}
 			$is_entry_detail	= $this->is_entry_detail();
 			$is_form_editor		= $this->is_form_editor();
 			$id					= (int) $this->id;
@@ -247,21 +264,23 @@ class GF_Field_Repeater2 extends GF_Field {
 			$repeater2_children	= $this->repeater2Children;
 			$repeater2_child_values = array();
 
-			if (!empty($repeater2_parem)) {
+			if ( !empty($repeater2_parem) ) {
 				$repeater2_parem_value = GFFormsModel::get_parameter_value($repeater2_parem, $value, $this);
-				if (!empty($repeater2_parem_value)) { $repeater2_start = $repeater2_parem_value; }
+				if (!empty($repeater2_parem_value)) {
+					$repeater2_start = $repeater2_parem_value;
+				}
 			}
 			if (!empty($repeater2_children)) {
 				$repeater2_children_info = array();
 				$repeater2_parems = GF_Field_Repeater2::get_children_parem_values($form, $repeater2_children);
-
+				$set_id           = $save_field_count[ $id ];
 				foreach( $repeater2_children as $repeater2_child ) {
-					$repeater2_children_info[$repeater2_child] = array();
+					$repeater2_children_info[ $repeater2_child ] = array();
 					$repeater2_child_field_index = GF_Field_Repeater2::get_field_index($form, 'id', $repeater2_child);
 
 					for( $i=1; $i < $repeater2_max; $i++ ) {
-						$post_value = rgpost( 'input_' . $repeater2_child . '-' . $i . '-1' );
-						$repeater2_child_values["input_$repeater2_child-$i-1"] = $post_value;
+						$post_value = rgpost( 'input_' . $repeater2_child . '-' . $set_id . '-' . $i );
+						$repeater2_child_values["input_$repeater2_child-$set_id-$i"] = $post_value;
 					}
 
 					if (!empty($repeater2_required)) {
@@ -302,7 +321,6 @@ class GF_Field_Repeater2 extends GF_Field {
 			if (!empty($repeater2_child_values)) { $value['values'] = $repeater2_child_values; }
 
 			$value = json_encode($value);
-
 
 			return sprintf("<input name='input_%d' id='%s' type='hidden' class='gform_repeater2' value='%s' />", $id, $field_id, $value);
 		}
